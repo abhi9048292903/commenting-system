@@ -1,0 +1,105 @@
+class User {
+    constructor(user) {
+        this.user = {
+            name: user.name || null,
+            email: user.email || null,
+            pwd: user.pwd || null
+        };
+    }
+    signUp(event) {
+        let self = this;
+        event.preventDefault();
+        let target = event.target;
+        var user = {};
+        for (let i = 0; i < target.elements.length; i++) {
+            switch (target.elements[i].type) {
+                case 'email':
+                    user.email = target.elements[i].value;
+                    break;
+                case 'password':
+                    user.password = target.elements[i].value;
+                    break;
+                case 'text':
+                    user.name = target.elements[i].value;
+                    break;
+                default:
+                    break;
+            }
+        }
+        let _ulist = self.getUserList();
+        let res = _ulist.filter((_user) => {
+            return _user.email === user.email;
+        })
+        if (res.length == 0) {
+            user.id = new Date().getTime();
+            _ulist.push(user);
+            self.saveUserList(_ulist);
+            alert('Successful. Please do login');
+            document.getElementById('singUpDiv').style.display = 'none';
+            document.getElementById('loginDiv').style.display = 'block';
+        } else {
+            alert('Already existing');
+        }
+
+    }
+    switchForm(event) {
+        let target = event.target
+        if (target.getAttribute('data-btn') == 'signup') {
+            document.getElementById('singUpDiv').style.display = 'block';
+            document.getElementById('loginDiv').style.display = 'none';
+        } else if (target.getAttribute('data-btn') == 'cancel') {
+            document.getElementById('singUpDiv').style.display = 'none';
+            document.getElementById('loginDiv').style.display = 'block';
+        }
+    }
+    getUserList() {
+        let userList = localStorage.getItem('users');
+        if (userList != null && userList != undefined) {
+            return JSON.parse(userList)
+        } else {
+            return [];
+        }
+    }
+    saveUserList(users) {
+        localStorage.setItem('users', JSON.stringify(users));
+    }
+    doSignIn(event) {
+        let self = this;
+        event.preventDefault();
+        let target = event.target;
+        var credentials = {};
+        for (let i = 0; i < target.elements.length; i++) {
+            switch (target.elements[i].type) {
+                case 'email':
+                    credentials.email = target.elements[i].value;
+                    break;
+                case 'password':
+                    credentials.password = target.elements[i].value;
+                    break;
+                default:
+                    break;
+            }
+        }
+        let userList = self.getUserList();
+        let res = userList.filter((user) => {
+            return user.email === credentials.email;
+        })
+        if (res.length > 0) {
+            // go to new page
+            localStorage.setItem('session', JSON.stringify(res[0]));
+            window.location.href = '/allcomments';
+        } else {
+            alert('Email or password in correct')
+        }
+    }
+}
+
+(function() {
+    let signInit = document.getElementById('signupinit');
+    let cancelBtn = document.getElementById('cancelBtn');
+    let userInstance = new User({});
+    signInit.addEventListener('click', userInstance.switchForm);
+    cancelBtn.addEventListener('click', userInstance.switchForm);
+    document.getElementById('loginForm').addEventListener('submit', (event) => { userInstance.doSignIn(event) })
+    document.getElementById('signUpForm').addEventListener('submit', (event) => { userInstance.signUp(event) })
+})();

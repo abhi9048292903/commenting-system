@@ -1,0 +1,291 @@
+class CommentsManager {
+
+    constructor() {
+        let self = this;
+        this.commentDB = null;
+    }
+    createComment(event) {
+        let target = event.target;
+        var _data = null
+        for (let i = 0; i < target.elements.length; i++) {
+            switch (target.elements[i].type) {
+                case 'text':
+                    _data = target.elements[i].value;
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (_data != null) {
+            let res = this.getComments();
+            let timeStp = new Date().getTime();
+            let obj = {
+                comment: _data,
+                author: this.getUser(),
+                timeStamp: timeStp,
+                root: true,
+                id: `root_${timeStp}`,
+                children: [],
+                type: 'p' // post
+            }
+            if (res.length > 0) {
+                res.unshift(obj);
+            } else {
+                res.push(obj);
+            }
+            this.setComments(res);
+            this.rerenderDOM(res);
+        } else {
+            return;
+        }
+    }
+    createReplay(_data, parentId) {
+        let timeStp = new Date().getTime();
+        let obj = {
+            comment: _data,
+            author: this.getUser(),
+            timeStamp: timeStp,
+            parentId: parentId,
+            id: `replay_${timeStp}`,
+            children: []
+        }
+        return obj;
+    }
+
+    getComments() {
+        let comments = localStorage.getItem('comments');
+        if (comments != null && comments != undefined) {
+            return JSON.parse(comments)
+        } else {
+            return [];
+        }
+    }
+    setComments(commentslist) {
+        if (commentslist.length > 0) {
+            localStorage.setItem('comments', JSON.stringify(commentslist));
+        }
+    }
+    updatedItem(event) {
+        let self = this;
+        let targetForm = event.target
+        let fullcomments = self.getComments();
+        let editedText = targetForm.elements[0].value;
+        let commentId = targetForm.getAttribute('data-commentid');
+        let parentId = targetForm.getAttribute('data-parentid');
+        fullcomments.forEach((item, index) => {
+            if (parentId == 'root') {
+                if (commentId === item.id) {
+                    let newItem = Object.assign(item, { comment: editedText })
+                    fullcomments.splice(index, 1);
+                    fullcomments.unshift(newItem)
+                }
+            } else {
+                // level one
+                if (item.hasOwnProperty('children')) {
+                    if (item.children.length > 0) {
+                        item.children.forEach((child, ind) => {
+                            if (commentId === child.id) {
+                                let newChild = Object.assign(child, { comment: editedText })
+                                item.splice(ind, 1);
+                                item.unshift(newChild)
+                            }
+                        })
+                    }
+                }
+            }
+        })
+        this.setComments(fullcomments);
+    }
+    getUser() {
+        return JSON.parse(localStorage.getItem('session')) || null;
+    }
+    rerenderDOM(_commentList) {
+        let self = this;
+        _commentList.forEach(comment => {
+            self.recursion(comment)
+        })
+
+    }
+    recursion(comment) {
+        let self = this;
+        if (comment) {
+            let commentLI = document.createElement('LI');
+            commentLI.setAttribute('id', comment.id);
+            if (comment instanceof Object) {
+                commentLI.appendChild(self.boxCreator(comment));
+                let ulForall = document.createElement('UL');
+                ulForall.setAttribute('id', `ul_${comment.id}`);
+                commentLI.appendChild(ulForall)
+                if (comment.hasOwnProperty('root')) {
+                    // append to list div wrapper
+                    document.getElementById('commentsWrapper').appendChild(commentLI)
+                } else {
+                    // replay comments
+                    let parentLi = document.getElementById(`ul_${comment.parentId}`);
+                    if (parentLi != null) {
+                        parentLi.appendChild(commentLI);
+                    }
+                }
+                if (comment.hasOwnProperty('children')) {
+                    if (comment.children.length > 0) {
+                        this.rerenderDOM(comment.children)
+                    }
+                }
+            }
+
+        }
+    }
+    boxCreator(item) {
+        let commentBox = document.createElement('section');
+        commentBox.className = 'comment-box';
+        // top bar
+        let commentHead = document.createElement('DIV');
+        commentHead.className = 'comment-head'
+        let timeSpan = document.createElement('SPAN');
+        let userSpan = document.createElement('DIV');
+        let timeText = document.createTextNode(this.timeFormat(item.timeStamp));
+        let userName = document.createTextNode(item.author.name);
+        userSpan.appendChild(userName)
+        timeSpan.appendChild(timeText);
+        commentHead.appendChild(timeSpan);
+        commentHead.appendChild(userSpan);
+        commentBox.appendChild(commentHead);
+        // comment
+        let commentBody = document.createElement('DIV');
+        commentBody.className = 'comment-body';
+        let commentText = document.createElement('P');
+        commentText.setAttribute('id', `commentText_${item.id}`);
+        let commentValueText = document.createTextNode(item.comment);
+        commentText.appendChild(commentValueText);
+        commentBody.appendChild(commentText);
+        commentBox.appendChild(commentBody);
+        // tools 
+        let toolBox = document.createElement('DIV');
+        toolBox.className = 'tool-box'
+        let editbtn = document.createElement('SPAN');
+        editbtn.setAttribute('data-btntype', 'editbtn');
+        editbtn.setAttribute('data-parentid', item.parentId ? item.parentId : 'root');
+        editbtn.setAttribute('data-ownid', item.id);
+        let replaybtn = document.createElement('SPAN');
+        replaybtn.setAttribute('data-btntype', 'replaybtn');
+        replaybtn.setAttribute('data-parentid', item.parentId ? item.parentId : 'root');
+        replaybtn.setAttribute('data-ownid', item.id);
+        let editBtnText = document.createTextNode('Edit');
+        let replayBtnText = document.createTextNode('Replay');
+        editbtn.appendChild(editBtnText);
+        replaybtn.appendChild(replayBtnText);
+        toolBox.appendChild(replaybtn);
+        if (this.getUser().email === item.author.email) {
+            toolBox.appendChild(editbtn);
+        }
+        commentBox.appendChild(toolBox);
+        return commentBox;
+
+    }
+    timeFormat(_timeStamp) {
+        let _d = new Date(_timeStamp);
+        let h = _d.getHours() > 9 ? _d.getHours() : '0' + _d.getHours();
+        let m = _d.getMinutes() > 9 ? _d.getMinutes() : '0' + _d.getMinutes();
+        return `${h}:${m}`;
+    }
+    replayInit(target, commentId, parentId) {
+        target.parentElement.style.display = 'none';
+        let form = document.createElement('FORM');
+        form.className = 'inline-form mg-top pd-lft';
+        form.setAttribute('data-commentid', commentId);
+        form.setAttribute('data-parentid', parentId);
+        let replayInput = document.createElement('input');
+        replayInput.setAttribute('type', 'text');
+        replayInput.setAttribute('placeholder', 'Write your replay.');
+        replayInput.setAttribute('id', `replayInput_${commentId}`);
+        form.appendChild(replayInput);
+        let replaySave = document.createElement('input');
+        replaySave.setAttribute('type', 'submit');
+        replaySave.setAttribute('value', 'Submit');
+        form.appendChild(replaySave);
+        form.addEventListener('submit', submitReplay);
+        document.getElementById(commentId).firstChild.appendChild(form);
+
+    }
+    saveReplay(commentId, parentId, _commentType) {
+        let fullcomments = this.getComments();
+        let self = this;
+        let cmdtext = document.getElementById(`replayInput_${commentId}`).value;
+        fullcomments.forEach(item => {
+            if (parentId == 'root') {
+                if (commentId === item.id) {
+                    if (cmdtext != null && cmdtext != "") {
+                        item.children.push(self.createReplay(cmdtext, commentId))
+                    }
+                }
+            } else {
+                // level one
+                if (item.hasOwnProperty('children')) {
+                    if (item.children.length > 0) {
+                        item.children.forEach(child => {
+                            if (commentId === child.id) {
+                                child.children.push(self.createReplay(cmdtext, commentId));
+                            }
+                        })
+                    }
+                }
+            }
+        })
+        this.setComments(fullcomments);
+    }
+    editInit(commentId, parentId) {
+        let self = this
+        document.getElementById(`commentText_${commentId}`).style.display = 'none';
+        let form = document.createElement('FORM');
+        form.className = 'inline-form';
+        form.setAttribute('data-commentid', commentId);
+        form.setAttribute('data-parentid', parentId);
+        let editInput = document.createElement('input');
+        editInput.setAttribute('type', 'text');
+        editInput.setAttribute('value', document.getElementById(`commentText_${commentId}`).innerText);
+        editInput.setAttribute('id', `editInput_${commentId}`);
+        form.appendChild(editInput);
+        let replaySave = document.createElement('input');
+        replaySave.setAttribute('type', 'submit');
+        replaySave.setAttribute('value', 'Save');
+        form.appendChild(replaySave);
+        form.addEventListener('submit', (event) => { self.updatedItem(event) });
+        document.getElementById(`commentText_${commentId}`).parentElement.appendChild(form);
+
+    }
+
+}
+// start
+
+const cmtManager = new CommentsManager();
+
+(function() {
+    cmtManager.rerenderDOM(cmtManager.getComments());
+    document.getElementById('commentForm').addEventListener('submit', cmtManager.createComment)
+})();
+
+function submitReplay(event) {
+    let target = event.target
+    cmtManager.saveReplay(target.getAttribute('data-commentid'), target.getAttribute('data-parentid'), target.getAttribute('data-type'));
+}
+
+function onClick(event) {
+    // initiate edit and replay
+    let target = event.target;
+    if (target.tagName != 'SPAN') {
+        return;
+    }
+    switch (target.getAttribute('data-btntype')) {
+        case 'replaybtn':
+            // replay activate
+            cmtManager.replayInit(target, target.getAttribute('data-ownid'), target.getAttribute('data-parentid'))
+            break;
+        case 'editbtn':
+            // edit init
+            cmtManager.editInit(target.getAttribute('data-ownid'), target.getAttribute('data-parentid'))
+            break;
+
+        default:
+            break;
+    }
+}

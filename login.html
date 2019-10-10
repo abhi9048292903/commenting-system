@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .login-container {
+            margin: 0 auto;
+            width: 50%;
+        }
+        
+        .login-form {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .form-wrapper div {
+            margin-bottom: 8px;
+        }
+        
+        .pull-right {
+            float: right;
+        }
+        
+        .link-btn {
+            font-size: 12px;
+            padding: 8px 8px;
+            color: #2B91FF;
+            cursor: pointer;
+        }
+        
+        .link-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+    <section class="login-container">
+        <div class="login-form" id="loginDiv">
+            <form class="form-wrapper" id="loginForm">
+                <div>
+                    <h3>User login</h3>
+                </div>
+                <div>
+                    <input type="email" placeholder="Email" required>
+                </div>
+                <div>
+                    <input type="password" placeholder="Password" required>
+                </div>
+                <div>
+                    <input type="submit" value="Login">
+                    <span class="pull-right link-btn" id="signupinit" data-btn="signup">
+                        Signup
+                    </span>
+                </div>
+            </form>
+        </div>
+        <div class="login-form" hidden id="singUpDiv">
+            <form class="form-wrapper" id="signUpForm">
+                <div>
+                    <h3>User signup</h3>
+                </div>
+                <div>
+                    <input type="text" placeholder="Name" required>
+                </div>
+                <div>
+                    <input type="email" placeholder="Email" required>
+                </div>
+                <div>
+                    <input type="password" placeholder="Password" required>
+                </div>
+                <div>
+                    <input type="submit" value="Signup">
+                    <span class="pull-right link-btn" id="cancelBtn" data-btn="cancel">
+                            Cancel
+                    </span>
+                </div>
+            </form>
+        </div>
+
+    </section>
+
+    <script src="/js/user.js" async defer></script>
+</body>
+
+</html>

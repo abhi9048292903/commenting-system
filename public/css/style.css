@@ -1,0 +1,136 @@
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+h1,
+h3,
+p {
+    margin: 0;
+}
+
+li {
+    list-style: none;
+}
+
+ul {
+    list-style: none;
+}
+
+main {
+    margin-left: auto;
+    margin-right: auto;
+    width: 75%;
+    border: 1px solid #f1f1f1;
+    padding: 12px;
+    height: 100vh;
+}
+
+input {
+    padding: 4px 16px;
+}
+
+input[type="submit"] {
+    cursor: pointer;
+    background-color: #FF8F21;
+    color: #fff;
+    border-color: #FF8F21;
+    outline: none;
+    border-style: solid;
+}
+
+input[type="submit"]:hover {
+    background-color: #DE6C00;
+    border-color: #DE6C00;
+}
+
+.form-control {
+    display: grid;
+    padding: 32px 16px;
+    grid-template-columns: 1fr 160px;
+    grid-column-gap: 16px;
+}
+
+.wrapper {
+    margin: 32px 0;
+}
+
+.comment-wrapper {
+    height: 65vh;
+}
+
+.comment-box {
+    padding: 8px 16px;
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.comment-head {
+    font-size: 12px;
+    color: #999;
+}
+
+.comment-head span {
+    position: absolute;
+    right: 8px;
+}
+
+.comment-body {
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+}
+
+.comment-box .tool-box {
+    font-size: 12px;
+    color: #FF8F21;
+    margin-top: 6px;
+    padding: 0 32px;
+}
+
+.tool-box span {
+    cursor: pointer;
+    padding: 2px 8px;
+    border: 1px solid #FF8F21;
+    margin-right: 16px;
+}
+
+.tool-box span:hover {
+    color: #DE6C00
+}
+
+.inline-form input:first-child {
+    margin-right: 8px;
+}
+
+.mg-top {
+    margin-top: 8px;
+}
+
+.pd-lft {
+    padding-left: 16px;
+}
+
+@media only screen and (max-width: 600px) {
+    .form-control {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-column-gap: 0;
+        grid-row-gap: 8px;
+        padding: 0;
+    }
+    .comment-box {
+        margin-bottom: 8px;
+    }
+    .comment-box .tool-box {
+        padding: 0 4px;
+        font-size: 8px;
+    }
+    ul {
+        margin: 4px 0;
+        padding-left: 8px;
+    }
+    .tool-box span {
+        padding: 2px 4px;
+        margin-right: 8px;
+    }
+}
